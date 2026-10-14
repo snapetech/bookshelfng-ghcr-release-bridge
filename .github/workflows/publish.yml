@@ -1,0 +1,49 @@
+name: Publish BookshelfNG GHCR aliases
+
+on:
+  repository_dispatch:
+    types: [chaptarrng-release]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bookshelfng-ghcr-aliases
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      RELEASE_VERSION: ${{ github.event.client_payload.version }}
+      IMAGE_DIGEST: ${{ github.event.client_payload.image_digest }}
+      SOURCE_SHA: ${{ github.event.client_payload.source_sha }}
+      SOURCE_REPOSITORY: ${{ github.event.client_payload.source_repository }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Validate release event
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$SOURCE_REPOSITORY" == 'snapetech-org/chaptarrng' ]]
+          [[ "$RELEASE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          [[ "$IMAGE_DIGEST" =~ ^sha256:[a-f0-9]{64}$ ]]
+          [[ "$SOURCE_SHA" =~ ^[a-f0-9]{40}$ ]]
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
+      - name: Publish and verify aliases
+        run: bash scripts/publish-aliases.sh
