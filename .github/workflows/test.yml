@@ -1,0 +1,37 @@
+name: Validate GHCR bridge
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-ghcr-bridge-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+
+      - name: Install ShellCheck
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends shellcheck
+
+      - name: Check shell syntax and static analysis
+        run: |
+          bash -n scripts/publish-aliases.sh scripts/test-ghcr-release-bridge.sh
+          shellcheck scripts/publish-aliases.sh scripts/test-ghcr-release-bridge.sh
+
+      - name: Test fixed aliases, digest verification, and stale-release rejection
+        run: bash scripts/test-ghcr-release-bridge.sh
+
+      - name: Lint workflow YAML and expressions
+        run: go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.7 .github/workflows/*.yml
