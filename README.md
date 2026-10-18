@@ -1,8 +1,8 @@
 # BookshelfNG GHCR release bridge
 
-This small repository republishes the exact multi-architecture ChaptarrNG image digest under the mutable legacy BookshelfNG GHCR tags. It performs no application build and does not change pinned or versioned tags.
+This small repository republishes the exact multi-architecture ChaptarrNG compatibility image digests under the mutable legacy BookshelfNG GHCR tags. The `latest`, `main`, and `hardcover` aliases use the image with `HARDCOVER=true`; `softcover` uses the image with `HARDCOVER=false`. This preserves the source provider mode for bare numeric IDs during automatic database migration. The bridge performs no application build and does not change pinned or versioned tags.
 
-The bridge accepts only a `repository_dispatch` event from the ChaptarrNG release workflow with a strict semantic version, source commit, and `sha256:` digest. It refuses a release unless that exact version is the current latest stable ChaptarrNG release. A shared concurrency group prevents simultaneous updates to the moving aliases. The destination and aliases are fixed in the script. Each published alias is checked against the source digest; a mismatch fails the run.
+The bridge accepts only a `repository_dispatch` event from the ChaptarrNG release workflow with a strict semantic version, source commit, and three `sha256:` digests for the standard, softcover, and Hardcover images. It refuses a release unless that exact version is the current latest stable ChaptarrNG release. A shared concurrency group prevents simultaneous updates to the moving aliases. The destination and alias-to-flavor mapping are fixed in the script. Each published alias is checked against its matching source digest; a mismatch fails the run.
 
 ## One-time GitHub setup
 
@@ -15,4 +15,4 @@ The repository and App installation are durable configuration. GitHub App instal
 
 ## Local validation
 
-Run `bash scripts/test-ghcr-release-bridge.sh`. The test replaces Buildx with a local mock and proves that only the three fixed tags receive the supplied digest, digest mismatches fail, and malformed inputs are rejected.
+Run `bash scripts/test-ghcr-release-bridge.sh`. The test replaces Buildx with a local mock and proves that the four fixed tags receive the matching provider-mode digest, digest mismatches fail, and malformed inputs are rejected.
