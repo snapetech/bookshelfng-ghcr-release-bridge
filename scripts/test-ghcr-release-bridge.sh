@@ -58,8 +58,6 @@ run_bridge() {
     SOURCE_REPOSITORY="${SOURCE_REPOSITORY:-snapetech-org/chaptarrng}" \
     SOURCE_SHA="${SOURCE_SHA:-0123456789abcdef0123456789abcdef01234567}" \
     IMAGE_DIGEST="$IMAGE_DIGEST" \
-    SOFTCOVER_IMAGE_DIGEST="$SOFTCOVER_IMAGE_DIGEST" \
-    HARDCOVER_IMAGE_DIGEST="$HARDCOVER_IMAGE_DIGEST" \
     bash "$root/scripts/publish-aliases.sh"
 }
 
