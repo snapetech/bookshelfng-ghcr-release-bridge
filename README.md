@@ -1,8 +1,10 @@
 # BookshelfNG GHCR release bridge
 
-This small repository republishes the exact multi-architecture ChaptarrNG compatibility image digests under the mutable legacy BookshelfNG GHCR tags. The `latest`, `main`, and `hardcover` aliases use the image with `HARDCOVER=true`; `softcover` uses the image with `HARDCOVER=false`. This preserves the source provider mode for bare numeric IDs during automatic database migration. The bridge performs no application build and does not change pinned or versioned tags.
+This repository republishes the exact multi-architecture digest of the ordinary ChaptarrNG release image under the mutable legacy BookshelfNG GHCR tags. The `latest`, `main`, `master`, `hardcover`, and `softcover` tags all resolve to the same standard image. They are retained as pull identities only; no compatibility image or second ChaptarrNG build is created, and versioned or pinned tags are left untouched.
 
-The bridge accepts only a `repository_dispatch` event from the ChaptarrNG release workflow with a strict semantic version, source commit, and three `sha256:` digests for the standard, softcover, and Hardcover images. It refuses a release unless that exact version is the current latest stable ChaptarrNG release. A shared concurrency group prevents simultaneous updates to the moving aliases. The destination and alias-to-flavor mapping are fixed in the script. Each published alias is checked against its matching source digest; a mismatch fails the run.
+The bridge accepts only a `repository_dispatch` event from the ChaptarrNG release workflow with a strict semantic version, source commit, and one `sha256:` digest for the standard image. It refuses a release unless that exact version is the current latest stable ChaptarrNG release. A shared concurrency group prevents simultaneous updates to the moving aliases. The destination and fixed tag list are defined in the script. Every published alias is checked against the same source digest; a mismatch fails the run.
+
+Provider mode is not encoded in a container tag. The ChaptarrNG migration path must use the BookshelfNG provider setting preserved from the installation or an explicit operator-selected runtime setting. If a legacy installation did not persist that setting, migration must request it and stop safely until it is supplied; it must not guess from a tag name.
 
 ## One-time GitHub setup
 
@@ -15,7 +17,7 @@ The repository and App installation are durable configuration. GitHub App instal
 
 ## Local validation
 
-Run `bash scripts/test-ghcr-release-bridge.sh`. The test replaces Buildx with a local mock and proves that the four fixed tags receive the matching provider-mode digest, digest mismatches fail, and malformed inputs are rejected.
+Run `bash scripts/test-ghcr-release-bridge.sh`. The test replaces Buildx with a local mock and proves that all five fixed legacy tags receive the same standard image digest, digest mismatches fail, stale releases are rejected, and malformed inputs are rejected.
 
 ## Local security scanning
 
