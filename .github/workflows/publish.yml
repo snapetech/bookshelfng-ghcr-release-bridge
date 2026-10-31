@@ -20,8 +20,6 @@ jobs:
     env:
       RELEASE_VERSION: ${{ github.event.client_payload.version }}
       IMAGE_DIGEST: ${{ github.event.client_payload.image_digest }}
-      SOFTCOVER_IMAGE_DIGEST: ${{ github.event.client_payload.softcover_image_digest }}
-      HARDCOVER_IMAGE_DIGEST: ${{ github.event.client_payload.hardcover_image_digest }}
       SOURCE_SHA: ${{ github.event.client_payload.source_sha }}
       SOURCE_REPOSITORY: ${{ github.event.client_payload.source_repository }}
       GH_TOKEN: ${{ github.token }}
@@ -35,8 +33,6 @@ jobs:
           [[ "$SOURCE_REPOSITORY" == 'snapetech-org/chaptarrng' ]]
           [[ "$RELEASE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
           [[ "$IMAGE_DIGEST" =~ ^sha256:[a-f0-9]{64}$ ]]
-          [[ "$SOFTCOVER_IMAGE_DIGEST" =~ ^sha256:[a-f0-9]{64}$ ]]
-          [[ "$HARDCOVER_IMAGE_DIGEST" =~ ^sha256:[a-f0-9]{64}$ ]]
           [[ "$SOURCE_SHA" =~ ^[a-f0-9]{40}$ ]]
 
       - name: Set up Docker Buildx
@@ -49,5 +45,5 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ github.token }}
 
-      - name: Publish provider-mode-specific aliases and verify digests
+      - name: Publish legacy aliases from the standard image digest
         run: bash scripts/publish-aliases.sh
